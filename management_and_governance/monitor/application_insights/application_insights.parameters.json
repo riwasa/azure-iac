@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "applicationInsightsApplicationType": {
+      "value": "web"
+    },
+    "applicationInsightsKind": {
+      "value": "web"
+    },
+    "applicationInsightsRetentionInDays": {
+      "value": 90
+    },
+    "dailyQuotaInGB": {
+      "value": 1
+    },
+    "enableLogAccessUsingOnlyResourcePermissions": {
+      "value": true
+    },
+    "logAnalyticsRetentionInDays": {
+      "value": 30
+    },
+    "publicNetworkAccessForIngestion": {
+      "value": "Enabled"
+    },
+    "publicNetworkAccessForQuery": {
+      "value": "Enabled"
+    }
+  }
+}
