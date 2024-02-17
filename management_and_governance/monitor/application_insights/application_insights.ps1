@@ -22,20 +22,8 @@ $location = ""
 $applicationInsightsComponentName = ""
 $logAnalyticsWorkspaceName = ""
 
-# Check if the Log Analytics Workspace already exists. Suppress any error messages.
-$lawExists = $null -ne (az monitor log-analytics workspace show `
-  --resource-group $resourceGroupName --workspace-name $logAnalyticsWorkspaceName `
-  --query "id" -o tsv 2>$null)
-
-Write-Host "Log Analytics Workspace already exists: $lawExists"
-
-# Create an Application Insights Component, and if necessary, a Log Analytics Workspace.
-if ($lawExists) {
-  Write-Host "Creating an Application Insights Component"
-  Write-Host "Note that properties will not be updated on the existing Log Analytics Workspace"
-} else {
-  Write-Host "Creating a Log Analytics Workspace and an Application Insights Component"
-}
+# Create an Application Insights Component, and if specified, a Log Analytics Workspace.
+Write-Host "Creating an Application Insights Component, and if specified, a Log Analytics Workspace."
 
 az deployment group create `
   --name "application_insights" `
@@ -44,5 +32,4 @@ az deployment group create `
   --parameters "application_insights.parameters.json" `
   --parameters applicationInsightsComponentName=$applicationInsightsComponentName `
                location=$location `
-               logAnalyticsWorkspaceExists=$lawExists `
                logAnalyticsWorkspaceName=$logAnalyticsWorkspaceName

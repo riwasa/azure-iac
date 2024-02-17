@@ -11,6 +11,9 @@
     "applicationInsightsRetentionInDays": {
       "value": 90
     },
+    "createUpdateLogAnalyticsWorkspace": {
+      "value": true
+    },
     "dailyQuotaInGB": {
       "value": 1
     },

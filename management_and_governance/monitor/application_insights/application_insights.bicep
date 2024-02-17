@@ -51,6 +51,9 @@ param applicationInsightsKind string = 'web'
 ])
 param applicationInsightsRetentionInDays int = 90
 
+@description('Indicates if a Log Analytics Workspace should be created/updated specifically for this Application Insights Component.')
+param createUpdateLogAnalyticsWorkspace bool = false
+
 @description('The daily volume cap for ingestion in GB.')
 @minValue(-1)
 param dailyQuotaInGB int = -1
@@ -76,9 +79,6 @@ param location string = resourceGroup().location
 ])
 param logAnalyticsRetentionInDays int = 30
 
-@description('Indicates if the Log Analytics Workspace already exists.')
-param logAnalyticsWorkspaceExists bool = false
-
 @description('The name of the Log Analytics Workspace.')
 @minLength(4)
 @maxLength(63)
@@ -98,15 +98,15 @@ param publicNetworkAccessForIngestion string = 'Enabled'
 ])
 param publicNetworkAccessForQuery string = 'Enabled'
 
-// If the Log Analytics Workspace exists, get the resource and do not update
+// If a separate, pre-existing Log Analytics Workspace should be used, get the resource and do not update
 // any properties on it.
-resource logAnalyticsWorkspaceExisting 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (logAnalyticsWorkspaceExists) {
+resource logAnalyticsWorkspaceSeparate 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (!createUpdateLogAnalyticsWorkspace) {
   name: logAnalyticsWorkspaceName
   location: location
 }
 
-// If the Log Analytics Workspace does not exist, create it.
-resource logAnalyticsWorkspaceNew 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (!logAnalyticsWorkspaceExists) {
+// If a Log Analytics Workspace specific to the Application Insights Component should be used, create or update it.
+resource logAnalyticsWorkspaceAppi 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (createUpdateLogAnalyticsWorkspace) {
   name: logAnalyticsWorkspaceName
   location: location
   properties: {
@@ -140,9 +140,9 @@ var tableNames = [
   'AppTraces'
 ]
 
-resource table 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = [for tableName in tableNames: if (!logAnalyticsWorkspaceExists) {
+resource table 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = [for tableName in tableNames: if (createUpdateLogAnalyticsWorkspace) {
   name: tableName
-  parent: logAnalyticsWorkspaceNew
+  parent: logAnalyticsWorkspaceAppi
   properties: {
     retentionInDays: applicationInsightsRetentionInDays
   }
@@ -160,6 +160,6 @@ resource applicationInsightsComponent 'Microsoft.Insights/components@2020-02-02'
     publicNetworkAccessForIngestion: publicNetworkAccessForIngestion
     publicNetworkAccessForQuery: publicNetworkAccessForQuery
     Request_Source: 'rest'
-    WorkspaceResourceId: ((logAnalyticsWorkspaceExists)? logAnalyticsWorkspaceExisting.id : logAnalyticsWorkspaceNew.id)
+    WorkspaceResourceId: ((createUpdateLogAnalyticsWorkspace)? logAnalyticsWorkspaceAppi.id : logAnalyticsWorkspaceSeparate.id)
   }
 }
