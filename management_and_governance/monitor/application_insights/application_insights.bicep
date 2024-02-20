@@ -51,6 +51,10 @@ param applicationInsightsKind string = 'web'
 ])
 param applicationInsightsRetentionInDays int = 90
 
+// A value of true indicates that a Log Analytics Workspace should be created specifically for this Application Insights Component,
+// and properties on that workspace should be updated as needed.
+// A value of false indicates that a separate, pre-existing Log Analytics Workspace should be used. In this case, no updates will
+// be made to any properties on the Log Analytics Workspace.
 @description('Indicates if a Log Analytics Workspace should be created/updated specifically for this Application Insights Component.')
 param createUpdateLogAnalyticsWorkspace bool = false
 
